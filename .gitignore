@@ -1,0 +1,21 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Code quality reports
+bandit-report.json
+
+# OS files
+.DS_Store
+*/.DS_Store
+
+# Assets
+**/assets
+**/sample_texts
