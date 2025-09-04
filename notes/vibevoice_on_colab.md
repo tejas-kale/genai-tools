@@ -86,7 +86,7 @@ I updated the Colab notebook as follows:
 4. Converted the generated `.wav` file to `.mp3` and enabled direct download.
 
 ## Formatting
-VibeVoice is inconsistent with Markdown syntax. For exmaple, italicised text such as *this* is sometimes read literally as "star this star*. It also cannot read unordered lists correctly. 
+VibeVoice is inconsistent with Markdown syntax. For example, italicised text such as *this* is sometimes read literally as "star this star*. It also cannot read unordered lists correctly. 
 
 My Markdown files, often clippings of web articles via the Obsidian Web Clipper, contain metadata that must be removed. EPUB files are HTML files under the hood and also need to be converted to Markdown. 
 
