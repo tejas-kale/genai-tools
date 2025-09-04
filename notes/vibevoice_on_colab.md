@@ -99,7 +99,7 @@ I discovered two deficiences though:
 * The voice cannot pronounce contractions like "'s" correctly. So, "let's" is pronounced at "let" and "it's" as "it".
 
 <audio controls>
-  <source src="./assets/let_pronunciation.mp3" type="audio/mpeg">
+  <source src="./samples/let_pronunciation.mp3" type="audio/mpeg">
   Pronunciation of 's
 </audio>
 
@@ -108,11 +108,10 @@ I discovered two deficiences though:
 Considering the following clip and see if you can follow it in the transcript below:
 
 <audio controls>
-  <source src="./assets/problems_in_the_middle.mp3" type="audio/mpeg">
+  <source src="./samples/problems_in_the_middle.mp3" type="audio/mpeg">
   Trouble in the Middle
 </audio>
 
-[Trouble in the Middle](./assets/problems_in_the_middle.mp3)
 
 ```text
 Speaker 1: What if you can’t come up with a good fantasy scenario?
