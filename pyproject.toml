@@ -9,6 +9,7 @@ dependencies = [
     "html2text>=2025.4.15",
     "jupyter>=1.1.1",
     "litellm>=1.76.1",
+    "nbconvert>=7.16.6",
     "openai>=1.104.2",
     "pydub>=0.25.1",
     "torch>=2.8.0",
