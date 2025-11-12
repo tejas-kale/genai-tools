@@ -1,0 +1,34 @@
+{
+  "german_news": [
+    {
+      "name": "Tagesschau",
+      "rss_url": "https://example.com/tagesschau/feed.xml",
+      "category": "germany"
+    },
+    {
+      "name": "Deutschlandfunk Der Tag",
+      "rss_url": "https://example.com/deutschlandfunk/feed.xml",
+      "category": "germany"
+    }
+  ],
+  "indian_news": [
+    {
+      "name": "The Hindu In Focus",
+      "rss_url": "https://example.com/hindu/feed.xml",
+      "category": "india"
+    },
+    {
+      "name": "All India Radio News",
+      "rss_url": "https://example.com/air/feed.xml",
+      "category": "india"
+    }
+  ],
+  "deep_dive": [
+    {
+      "name": "The Daily",
+      "rss_url": "https://example.com/thedaily/feed.xml",
+      "category": "world",
+      "type": "deep_dive"
+    }
+  ]
+}
