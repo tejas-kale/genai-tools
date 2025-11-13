@@ -34,11 +34,22 @@ uv sync
 ### Usage
 
 ```bash
-# Test Claude API access
-uv run python test_claude_api.py
+# Configure Gemini API key (one-time setup)
+uv run llm keys set gemini
+# Enter your Gemini API key when prompted
 
-# Run full pipeline (when implemented)
-uv run python src/main.py
+# Validate podcast RSS feeds
+uv run python validate_podcasts.py
+
+# Fetch and filter episodes
+uv run python run_fetch_and_filter.py
+
+# Or run steps individually:
+# 1. Fetch episodes from RSS feeds
+uv run python src/fetch_feeds.py
+
+# 2. Filter episodes with Gemini
+uv run python src/filter_episodes.py
 ```
 
 ## Project Structure
@@ -70,10 +81,10 @@ weekly-news-brief/
 ## Pipeline Stages
 
 1. **RSS Feed Fetching**: Collect episodes from configured podcasts
-2. **Episode Filtering**: Claude AI selects 12-15 newsworthy episodes
+2. **Episode Filtering**: Gemini AI selects 12-15 newsworthy episodes
 3. **Audio Download**: Fetch selected episode audio files
 4. **Transcription**: Whisper.cpp converts audio to text (local, free)
-5. **Summarisation**: Claude AI generates structured weekly briefing
+5. **Summarisation**: Gemini AI generates structured weekly briefing
 
 ## Configuration
 
@@ -89,19 +100,28 @@ Whisper.cpp should be installed at `~/.local/share/llm/whisper.cpp/` with the ba
 ~/.local/share/llm/whisper.cpp/models/ggml-base.bin
 ```
 
-### Claude API
+### Gemini API
 
-Set your API key:
+Configure your API key using the llm package:
 
 ```bash
-export ANTHROPIC_API_KEY="your-api-key-here"
+uv run llm keys set gemini
+# Enter your API key when prompted
 ```
 
-Get your key from: https://console.anthropic.com/
+Get your API key from: https://aistudio.google.com/apikey
+
+The llm package stores keys securely in `~/.config/io.datasette.llm/keys.json`
 
 ### Podcast Sources
 
-Configure podcast RSS feeds in `config/podcasts.json` (template to be added).
+Podcast RSS feeds are configured in `config/podcasts.json`. Validation results available in `TASK_2_PODCAST_VALIDATION.md`.
+
+**Current sources:**
+- Indian news: 2 podcasts (The Hindu In Focus, ThePrint)
+- World news: 4 podcasts (BBC, Today Explained, FT, NPR)
+- Deep dive: 2 podcasts (The Daily, Today in Focus)
+- German news: TBD
 
 ## Development Status
 
@@ -111,10 +131,25 @@ Configure podcast RSS feeds in `config/podcasts.json` (template to be added).
 - [x] Create test script for Claude API
 - [x] Create project directory structure
 
+**Task 2: Podcast Source Validation** ✅ COMPLETED
+- [x] Validate RSS feeds
+- [x] Check recent episodes availability
+- [x] Verify audio formats
+- [x] Document publishing schedules
+
+**Task 3: RSS Feed Fetcher** ✅ COMPLETED
+- [x] Parse podcast RSS feeds
+- [x] Extract episode metadata (title, description, audio URL, date)
+- [x] Filter episodes from past 7 days
+- [x] Save to data/episode_metadata.json
+
+**Task 4: Episode Filter with Gemini** ✅ COMPLETED
+- [x] Configure llm package with Gemini support
+- [x] Build AI-powered episode filtering
+- [x] Select 12-15 newsworthy episodes
+- [x] Save filtered episodes with selection reasons
+
 **Next Steps**:
-- Task 2: Podcast source research and configuration
-- Task 3: Build RSS fetcher
-- Task 4: Build episode filter with Claude
 - Task 5: Build podcast downloader
 - Task 6: Build transcription pipeline
 - Task 7: Build summarisation pipeline
@@ -126,6 +161,9 @@ Configure podcast RSS feeds in `config/podcasts.json` (template to be added).
 
 - `PHASE_1.md`: Complete Phase 1 specification
 - `NOTES.md`: Whisper.cpp integration notes
+- `GEMINI_NOTES.md`: llm package and Gemini configuration guide
+- `TASK_2_PODCAST_VALIDATION.md`: Podcast source validation results
+- `TASKS_3_4_SUMMARY.md`: RSS fetching and episode filtering implementation
 
 ## License
 

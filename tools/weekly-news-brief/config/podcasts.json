@@ -1,34 +1,87 @@
 {
   "german_news": [
     {
-      "name": "Tagesschau",
-      "rss_url": "https://example.com/tagesschau/feed.xml",
+      "name": "Was jetzt?",
+      "rss_url": "https://feeds.simplecast.com/Xtqjn37O",
       "category": "germany"
     },
     {
-      "name": "Deutschlandfunk Der Tag",
-      "rss_url": "https://example.com/deutschlandfunk/feed.xml",
+      "name": "Die Lage",
+      "rss_url": "https://www.omnycontent.com/d/playlist/5ac1e950-45c7-4eb7-87c0-aa0f018441b8/bb17ca27-51f4-4349-bc1e-abc00102c975/4c18e072-24d2-4d60-9a42-abc00102c97e/podcast.rss",
+      "category": "germany"
+    },
+    {
+      "name": "Auf den Punkt",
+      "rss_url": "https://sz-auf-den-punkt.podigee.io/feed/mp3",
       "category": "germany"
     }
   ],
   "indian_news": [
     {
       "name": "The Hindu In Focus",
-      "rss_url": "https://example.com/hindu/feed.xml",
+      "rss_url": "https://feeds.megaphone.fm/THGU4956605070",
       "category": "india"
     },
     {
-      "name": "All India Radio News",
-      "rss_url": "https://example.com/air/feed.xml",
+      "name": "ThePrint",
+      "rss_url": "https://feed.podbean.com/theprint/feed.xml",
       "category": "india"
+    },
+    {
+      "name": "The Morning Brief",
+      "rss_url": "https://prod.aawaz.com/rss/feed/the-morning-brief/",
+      "category": "india"
+    },
+    {
+      "name": "3 Things",
+      "rss_url": "https://www.spreaker.com/show/5008053/episodes/feed",
+      "category": "india"
+    }
+  ],
+  "world_news": [
+    {
+      "name": "BBC Global News Podcast",
+      "rss_url": "https://podcasts.files.bbci.co.uk/p02nq0gn.rss",
+      "category": "world"
+    },
+    {
+      "name": "Today, Explained",
+      "rss_url": "https://feeds.megaphone.fm/VMP5705694065",
+      "category": "world"
+    },
+    {
+      "name": "FT News Briefing",
+      "rss_url": "https://feeds.acast.com/public/shows/73fe3ede-5c5c-4850-96a8-30db8dbae8bf",
+      "category": "world"
+    },
+    {
+      "name": "Up First",
+      "rss_url": "https://feeds.npr.org/510318/podcast.xml",
+      "category": "world"
+    },
+    {
+      "name": "Business Daily",
+      "rss_url": "https://podcasts.files.bbci.co.uk/p002vsxs.rss",
+      "category": "world"
     }
   ],
   "deep_dive": [
     {
       "name": "The Daily",
-      "rss_url": "https://example.com/thedaily/feed.xml",
+      "rss_url": "https://feeds.simplecast.com/54nAGcIl",
       "category": "world",
       "type": "deep_dive"
+    },
+    {
+      "name": "Today in Focus",
+      "rss_url": "https://www.theguardian.com/news/series/todayinfocus/podcast.xml",
+      "category": "world",
+      "type": "deep_dive"
+    },
+    {
+      "name": "Der Tag",
+      "rss_url": "https://www.deutschlandfunk.de/podcast-104.xml",
+      "category": "germany"
     }
   ]
 }

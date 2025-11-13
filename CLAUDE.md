@@ -53,7 +53,9 @@ uv remove <package-name>
 - Keep code terse and concise
 - Remove unnecessary comments
 - Use concise variable names
-- Avoid print statements and try-catch blocks
+- **AVOID print statements wherever possible** - only use when necessary for user feedback
+- **DO NOT use try-catch blocks unless explicitly specified** - let code fail so Tejas can debug issues
+- **NEVER use emojis in print statements or output**
 - Place Python imports at the top of modules (first cell for notebooks)
 - Use double quotes for strings
 - Explain any regular expressions used
