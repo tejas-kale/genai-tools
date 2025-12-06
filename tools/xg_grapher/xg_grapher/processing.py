@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 def calculate_rolling_averages(df: pd.DataFrame, team_name: str, window_size: int = 10):
     """
@@ -20,8 +21,8 @@ def calculate_rolling_averages(df: pd.DataFrame, team_name: str, window_size: in
     df = df.sort_values(by="date")
 
     # Calculate xG For and xG Against
-    df["xg_for"] = df.apply(lambda row: row["home_xg"] if row["home_team"] == team_name else row["away_xg"], axis=1)
-    df["xg_against"] = df.apply(lambda row: row["away_xg"] if row["home_team"] == team_name else row["home_xg"], axis=1)
+    df["xg_for"] = np.where(df["home_team"] == team_name, df["home_xg"], df["away_xg"])
+    df["xg_against"] = np.where(df["home_team"] == team_name, df["away_xg"], df["home_xg"])
     
     # Calculate rolling averages, grouped by season
     df["xg_for_roll"] = df.groupby("season")["xg_for"].transform(lambda x: x.rolling(window_size, min_periods=1).mean())

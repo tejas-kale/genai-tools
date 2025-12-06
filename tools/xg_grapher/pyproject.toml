@@ -12,7 +12,8 @@ dependencies = [
     "lxml",
     "html5lib",
     "sqlalchemy",
-    "altair"
+    "altair",
+    "numpy"
 ]
 
 [project.scripts]
