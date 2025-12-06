@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
-from data_manager import DataManager
-from processing import calculate_rolling_averages
+from .data_manager import DataManager
+from .processing import calculate_rolling_averages
 import os
 
 # Get the directory of the current script
