@@ -40,8 +40,8 @@ class DataManager:
                 connection.execute(create_table_query)
 
     def get_seasons(self):
-        """Returns a list of seasons from 2020-21 to 2024-25."""
-        return [f"{year}-{str(year+1)[-2:]}" for year in range(2020, 2025)]
+        """Returns a list of seasons from 2020-21 to 2025-26."""
+        return [f"{year}-{str(year+1)[-2:]}" for year in range(2020, 2026)]
 
     def get_leagues(self):
         """Returns a dictionary of top 5 leagues."""
@@ -133,3 +133,36 @@ class DataManager:
             """)
             df = pd.read_sql(query, connection, params={"team_name": team_name})
             return df
+
+    def get_league_data(self, league: str):
+        """
+        Retrieves all match data for a specific league.
+        Args:
+            league (str): The league identifier (e.g., 'EPL').
+        Returns:
+            pd.DataFrame: A DataFrame containing the league's match data.
+        """
+        with self.engine.connect() as connection:
+            query = text("""
+            SELECT * FROM match_stats WHERE league = :league
+            """)
+            df = pd.read_sql(query, connection, params={"league": league})
+            return df
+    
+    def get_teams_for_league(self, league: str):
+        """
+        Retrieves all unique team names for a specific league.
+        Args:
+            league (str): The league identifier (e.g., 'EPL').
+        Returns:
+            list: A list of unique team names.
+        """
+        with self.engine.connect() as connection:
+            query = text("""
+            SELECT DISTINCT home_team FROM match_stats WHERE league = :league
+            UNION
+            SELECT DISTINCT away_team FROM match_stats WHERE league = :league
+            ORDER BY 1
+            """)
+            teams = connection.execute(query, {"league": league}).fetchall()
+            return [team[0] for team in teams]
