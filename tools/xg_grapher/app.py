@@ -35,7 +35,7 @@ def main():
         if not league_data.empty:
             for team_name in teams:
                 st.header(team_name)
-                team_data = league_data[(league_data["home_team"] == team_name) | (league_data["away_team"] == team_name)]
+                team_data = league_data[(league_data["home_team"] == team_name) | (league_data["away_team"] == team_name)].copy()
                 
                 if not team_data.empty:
                     rolling_data = calculate_rolling_averages(team_data, team_name)
@@ -89,7 +89,7 @@ def main():
                         height=400
                     )
                     
-                    st.altair_chart(chart, use_container_width=False)
+                    st.altair_chart(chart)
         else:
             st.warning("No data found for the selected league.")
 
