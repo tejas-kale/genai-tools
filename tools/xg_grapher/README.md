@@ -4,16 +4,20 @@ This tool provides a Streamlit dashboard to visualize rolling averages of Expect
 
 ### How to Run
 
-1.  **Install dependencies:**
+This tool is a local script within the `genai-tools` project. You need to run it within the project's virtual environment managed by `uv`.
+
+1.  **Sync Environment:** First, ensure your dependencies are synced and the tool is installed in editable mode. From the root of the `genai-tools` project, run:
     ```bash
     uv sync
     ```
 
-2.  **Run the Streamlit app:**
+2.  **Run the App:** Use the `uv run` command to execute the script within the project's environment. `uv tool run` is used for packages installed from a registry (like PyPI), not for local scripts.
     ```bash
     uv run xg_grapher
     ```
-    Or, you can run it using `uv run` with streamlit directly:
+    This command executes the `xg_grapher` script defined in the project's `pyproject.toml` file.
+
+    Alternatively, you can run the Streamlit app directly, also using `uv run`:
     ```bash
     uv run streamlit run tools/xg_grapher/app.py
     ```
