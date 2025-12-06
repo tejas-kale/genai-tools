@@ -70,7 +70,6 @@ class DataManager:
             if result == 0:
                 fbref = sd.FBref(leagues=league, seasons=season)
                 matchlogs = fbref.read_schedule()
-                
                 # Filter for games with xG data and valid team names
                 matchlogs = matchlogs[matchlogs["home_xg"].notna() & matchlogs["away_xg"].notna()]
                 matchlogs = matchlogs[matchlogs["home_team"].notna() & matchlogs["away_team"].notna()]
@@ -79,7 +78,7 @@ class DataManager:
                 if not matchlogs.empty:
                     df = pd.DataFrame({
                         "season": season,
-                        "date": matchlogs["datetime"].dt.strftime('%Y-%m-%d'),
+                        "date": matchlogs["date"].dt.strftime('%Y-%m-%d'),
                         "league": self.get_leagues()[league],
                         "home_team": matchlogs["home_team"],
                         "away_team": matchlogs["away_team"],
