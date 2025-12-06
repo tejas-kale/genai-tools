@@ -52,10 +52,6 @@ def main():
                         "xg_against_roll": "Expected Goals Against"
                     })
 
-                    # Create a single continuous match number
-                    plot_data['global_match_num'] = plot_data.groupby('season').cumcount()
-                    season_starts = plot_data.groupby('season')['global_match_num'].min().reset_index()
-                    
                     # Chart
                     color_scale = alt.Scale(
                         domain=["Expected Goals For", "Expected Goals Against"],
@@ -63,29 +59,25 @@ def main():
                     )
 
                     line = alt.Chart(plot_data).mark_line().encode(
-                        x=alt.X("global_match_num:Q", title="Match Number"),
+                        x=alt.X("match_num:Q", title="Match Number"),
                         y=alt.Y("xG:Q", title="Expected Goals (10-game Rolling Avg)"),
                         color=alt.Color("Metric:N", scale=color_scale, title=None, legend=alt.Legend(orient="top")),
                         tooltip=["date", "xG", "season"]
                     )
                     
                     points = alt.Chart(plot_data).mark_point().encode(
-                        x=alt.X("global_match_num:Q"),
+                        x=alt.X("match_num:Q"),
                         y=alt.Y("xG:Q"),
                         color=alt.Color("Metric:N", scale=color_scale),
                         tooltip=["date", "xG", "season"]
                     )
 
-                    # Vertical lines for season demarcation
-                    rule_data = plot_data.groupby('season')['global_match_num'].max().reset_index()
-                    rule_data = rule_data[rule_data['season'] != rule_data['season'].max()] # Don't draw line at the very end
-                    
-                    rules = alt.Chart(rule_data).mark_rule(strokeDash=[4, 4], color='gray').encode(
-                        x='global_match_num:Q'
-                    )
-
-                    chart = (line + points + rules).properties(
+                    chart = (line + points).properties(
                         height=400
+                    ).facet(
+                        column=alt.Column("season:N", title=None, header=alt.Header(labelOrient="bottom"))
+                    ).configure_view(
+                        stroke=None # Removes the border around each facet
                     )
                     
                     st.altair_chart(chart, use_container_width=True)
