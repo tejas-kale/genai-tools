@@ -11,9 +11,13 @@ This tool provides a Streamlit dashboard to visualize rolling averages of Expect
 
 2.  **Run the Streamlit app:**
     ```bash
+    uv tool run xg_grapher
+    ```
+    Alternatively, you can run it using the direct script entry:
+    ```bash
     xg_grapher
     ```
-    Alternatively, you can run it using streamlit directly:
+    Or, you can run it using streamlit directly:
     ```bash
     streamlit run tools/xg_grapher/app.py
     ```
