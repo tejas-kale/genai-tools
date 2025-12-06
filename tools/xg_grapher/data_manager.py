@@ -69,8 +69,8 @@ class DataManager:
             result = connection.execute(query, {"league": self.get_leagues()[league], "season": season}).scalar()
 
             if result == 0:
-                fbref = sd.FBref(leagues=league, seasons=season)
-                matchlogs = fbref.read_schedule()
+                understat = sd.Understat(leagues=league, seasons=season)
+                matchlogs = understat.read_schedule()
                 # Filter for games with xG data and valid team names
                 matchlogs = matchlogs[matchlogs["home_xg"].notna() & matchlogs["away_xg"].notna()]
                 matchlogs = matchlogs[matchlogs["home_team"].notna() & matchlogs["away_team"].notna()]
