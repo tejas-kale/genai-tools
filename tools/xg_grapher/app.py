@@ -1,8 +1,14 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
-from xg_grapher.data_manager import DataManager
-from xg_grapher.processing import calculate_rolling_averages
+from data_manager import DataManager
+from processing import calculate_rolling_averages
+import os
+
+# Get the directory of the current script
+script_dir = os.path.dirname(os.path.abspath(__file__))
+db_path = os.path.join(script_dir, "xg_data.db")
+
 
 def get_team_selections(dm):
     """Creates a formatted list for the team selection dropdown."""
@@ -28,7 +34,7 @@ def main():
     st.set_page_config(layout="wide")
     st.title("xG Trend Visualizer")
 
-    dm = DataManager(db_path="./tools/xg_grapher/xg_data.db")
+    dm = DataManager(db_path=db_path)
     
     st.sidebar.header("Select Team")
 

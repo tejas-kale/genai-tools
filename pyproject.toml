@@ -22,6 +22,14 @@ dependencies = [
     "python-dateutil>=2.9.0.post0",
     "requests>=2.32.5",
     "scipy>=1.16.2",
+    "streamlit",
+    "pandas",
+    "soccerdata",
+    "lxml",
+    "html5lib",
+    "sqlalchemy",
+    "altair",
+    "numpy",
 ]
 
 [project.optional-dependencies]
@@ -31,8 +39,6 @@ dev = [
     "pre-commit>=4.0.0",
 ]
 
-[tool.uv.sources]
-xg_grapher = { path = "tools/xg_grapher" }
 
 [tool.ruff]
 target-version = "py311"
@@ -73,6 +79,7 @@ line-ending = "auto"
 
 [project.scripts]
 artomd = "tools.arxiv_to_md.cli:main"
+xg_grapher = "tools.xg_grapher.app:main"
 
 [dependency-groups]
 dev = [
