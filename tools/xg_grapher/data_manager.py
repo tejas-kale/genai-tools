@@ -1,7 +1,6 @@
 import os
 import pandas as pd
 import soccerdata as sd
-import soccerdata.config as sd_config
 from sqlalchemy import create_engine, inspect, text
 import requests
 
@@ -18,7 +17,7 @@ class DataManager:
         self.db_path = os.path.join(cache_dir, "xg_data.db")
         self.engine = create_engine(f"sqlite:///{self.db_path}")
         self._create_table()
-        sd_config.user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
+        sd.config.user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
 
     def _create_table(self):
         """Creates the match_stats table if it doesn't exist."""
