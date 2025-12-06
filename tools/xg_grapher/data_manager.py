@@ -2,20 +2,25 @@ import os
 import pandas as pd
 import soccerdata as sd
 from sqlalchemy import create_engine, inspect, text
+import requests
 
 class DataManager:
     """Manages data acquisition and persistence for the xG Grapher tool."""
 
-    def __init__(self, db_path="xg_data.db"):
+    def __init__(self):
         """
         Initializes the DataManager.
-
-        Args:
-            db_path (str): The path to the SQLite database file.
         """
-        self.db_path = db_path
+        cache_dir = os.path.expanduser("~/.cache/soccerdata")
+        os.environ["SOCCERDATA_DIR"] = cache_dir
+        os.makedirs(cache_dir, exist_ok=True)
+        self.db_path = os.path.join(cache_dir, "xg_data.db")
         self.engine = create_engine(f"sqlite:///{self.db_path}")
         self._create_table()
+        self.session = requests.Session()
+        self.session.headers.update({
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
+        })
 
     def _create_table(self):
         """Creates the match_stats table if it doesn't exist."""
@@ -65,7 +70,7 @@ class DataManager:
             result = connection.execute(query, {"league": self.get_leagues()[league], "season": season}).scalar()
 
             if result == 0:
-                fbref = sd.FBref(leagues=league, seasons=season)
+                fbref = sd.FBref(leagues=league, seasons=season, requests_session=self.session)
                 matchlogs = fbref.read_schedule()
                 
                 # Filter for games with xG data and valid team names

@@ -5,36 +5,12 @@ from .data_manager import DataManager
 from .processing import calculate_rolling_averages
 import os
 
-# Get the directory of the current script
-script_dir = os.path.dirname(os.path.abspath(__file__))
-db_path = os.path.join(script_dir, "xg_data.db")
-
-
-def get_team_selections(dm):
-    """Creates a formatted list for the team selection dropdown."""
-    # Pre-fetch data for all leagues and seasons to populate the dropdown
-    for league in dm.get_leagues():
-        for season in dm.get_seasons():
-            dm.fetch_and_store_data(league, season)
-    
-    teams_by_league = dm.get_teams_by_league()
-    
-    options = []
-    league_map = {v: k for k, v in dm.get_leagues().items()}
-    
-    for league_short, teams in sorted(teams_by_league.items()):
-        league_full = league_map.get(league_short, league_short).split('-')[1]
-        options.append(f"--- {league_full} ---")
-        for team in teams:
-            options.append(f"  {team}")
-    return options
-
 def main():
     """Main function to run the Streamlit app."""
     st.set_page_config(layout="wide")
     st.title("xG Trend Visualizer")
 
-    dm = DataManager(db_path=db_path)
+    dm = DataManager()
     
     st.sidebar.header("Select Team")
 
