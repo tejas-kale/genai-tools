@@ -1,0 +1,20 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "xg_grapher"
+version = "0.1.0"
+dependencies = [
+    "streamlit",
+    "pandas",
+"soccerdata[fbref]",
+    "sqlalchemy",
+    "altair",
+]
+
+[project.scripts]
+xg_grapher = "xg_grapher.app:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["xg_grapher"]
