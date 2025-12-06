@@ -85,11 +85,10 @@ def main():
                     )
 
                     chart = (line + points + rules).properties(
-                        width=800,
                         height=400
                     )
                     
-                    st.altair_chart(chart)
+                    st.altair_chart(chart, use_container_width=True)
         else:
             st.warning("No data found for the selected league.")
 
