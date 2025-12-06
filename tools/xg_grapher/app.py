@@ -80,7 +80,7 @@ def main():
                         stroke=None # Removes the border around each facet
                     )
                     
-                    st.altair_chart(chart, use_container_width=True)
+                    st.altair_chart(chart)
         else:
             st.warning("No data found for the selected league.")
 
