@@ -1,90 +1,132 @@
+import os
 import pandas as pd
 import soccerdata as sd
-from sqlalchemy import create_engine, inspect
-import os
+from sqlalchemy import create_engine, inspect, text
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "xg_data.db")
-DB_URI = f"sqlite:///{DB_PATH}"
-ENGINE = create_engine(DB_URI)
+class DataManager:
+    """Manages data acquisition and persistence for the xG Grapher tool."""
 
-LEAGUES = {
-    "ENG-Premier League": "ENG-Premier League",
-    "ESP-La Liga": "ESP-La Liga",
-    "ITA-Serie A": "ITA-Serie A",
-    "GER-Bundesliga": "GER-Bundesliga",
-    "FRA-Ligue 1": "FRA-Ligue 1",
-}
+    def __init__(self, db_path="xg_data.db"):
+        """
+        Initializes the DataManager.
 
-SEASONS = ["20-21", "21-22", "22-23", "23-24", "24-25"]
+        Args:
+            db_path (str): The path to the SQLite database file.
+        """
+        self.db_path = db_path
+        self.engine = create_engine(f"sqlite:///{self.db_path}")
+        self._create_table()
 
+    def _create_table(self):
+        """Creates the match_stats table if it doesn't exist."""
+        with self.engine.connect() as connection:
+            if not inspect(self.engine).has_table("match_stats"):
+                create_table_query = text("""
+                CREATE TABLE match_stats (
+                    season TEXT,
+                    date TEXT,
+                    league TEXT,
+                    home_team TEXT,
+                    away_team TEXT,
+                    home_xg REAL,
+                    away_xg REAL,
+                    PRIMARY KEY (date, home_team, away_team)
+                );
+                """)
+                connection.execute(create_table_query)
 
-def setup_database():
-    """Create the database and table if they don't exist."""
-    if not os.path.exists(DB_PATH):
-        os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    def get_seasons(self):
+        """Returns a list of seasons from 2020-21 to 2024-25."""
+        return [f"{year}-{str(year+1)[-2:]}" for year in range(2020, 2025)]
 
-    with ENGINE.connect() as connection:
-        if not inspect(ENGINE).has_table("match_stats"):
-            pd.DataFrame(
-                columns=[
-                    "season",
-                    "date",
-                    "league",
-                    "home_team",
-                    "away_team",
-                    "home_xg",
-                    "away_xg",
-                ]
-            ).to_sql(
-                "match_stats",
-                connection,
-                if_exists="fail",
-                index=False,
-                dtype={
-                    "season": "TEXT",
-                    "date": "DATETIME",
-                    "league": "TEXT",
-                    "home_team": "TEXT",
-                    "away_team": "TEXT",
-                    "home_xg": "FLOAT",
-                    "away_xg": "FLOAT",
-                },
-            )
-            # Add a unique constraint to prevent duplicate matches
-            connection.execute(
-                "CREATE UNIQUE INDEX ix_match_stats_unique "
-                "ON match_stats (date, home_team, away_team)"
-            )
+    def get_leagues(self):
+        """Returns a dictionary of top 5 leagues."""
+        return {
+            "ENG-Premier League": "EPL",
+            "ESP-La Liga": "La Liga",
+            "ITA-Serie A": "Serie A",
+            "GER-Bundesliga": "Bundesliga",
+            "FRA-Ligue 1": "Ligue 1",
+        }
 
+    def fetch_and_store_data(self, league: str, season: str):
+        """
+        Fetches data from soccerdata and stores it in the database.
 
-def get_data(league: str, season: str) -> pd.DataFrame:
-    """Fetch data from the database or soccerdata."""
-    setup_database()
-    try:
-        with ENGINE.connect() as connection:
-            # Check if data for the league and season exists
-            query = f"SELECT * FROM match_stats WHERE league = '{league}' AND season = '{season}'"
-            if pd.read_sql(query, connection).empty:
+        Args:
+            league (str): The league identifier (e.g., 'ENG-Premier League').
+            season (str): The season identifier (e.g., '20-21').
+        """
+        with self.engine.connect() as connection:
+            # Check if data exists
+            query = text("""
+            SELECT COUNT(*) FROM match_stats WHERE league = :league AND season = :season
+            """)
+            result = connection.execute(query, {"league": self.get_leagues()[league], "season": season}).scalar()
+
+            if result == 0:
                 fbref = sd.FBref(leagues=league, seasons=season)
-                stats = fbref.read_schedule()
-                stats = stats[["season", "date", "league", "home_team", "away_team", "home_xg", "away_xg"]]
-                stats.to_sql(
-                    "match_stats", connection, if_exists="append", index=False
-                )
-            return pd.read_sql(f"SELECT * FROM match_stats WHERE league = '{league}'", connection)
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return pd.DataFrame()
+                matchlogs = fbref.read_schedule()
+                
+                # Filter for games with xG data and valid team names
+                matchlogs = matchlogs[matchlogs["home_xg"].notna() & matchlogs["away_xg"].notna()]
+                matchlogs = matchlogs[matchlogs["home_team"].notna() & matchlogs["away_team"].notna()]
 
 
-def get_available_teams() -> dict:
-    """Get a dictionary of leagues and their teams from the database."""
-    setup_database()
-    teams = {}
-    with ENGINE.connect() as connection:
-        for league_id, league_name in LEAGUES.items():
-            query = f"SELECT DISTINCT home_team FROM match_stats WHERE league = '{league_id}'"
-            df = pd.read_sql(query, connection)
-            if not df.empty:
-                teams[league_name] = sorted(df["home_team"].unique().tolist())
-    return teams
+                if not matchlogs.empty:
+                    df = pd.DataFrame({
+                        "season": season,
+                        "date": matchlogs["datetime"].dt.strftime('%Y-%m-%d'),
+                        "league": self.get_leagues()[league],
+                        "home_team": matchlogs["home_team"],
+                        "away_team": matchlogs["away_team"],
+                        "home_xg": matchlogs["home_xg"],
+                        "away_xg": matchlogs["away_xg"],
+                    })
+                    df.to_sql("match_stats", self.engine, if_exists="append", index=False)
+
+    def get_all_teams(self):
+        """Fetches all unique team names from the database."""
+        with self.engine.connect() as connection:
+            query = text("SELECT DISTINCT home_team FROM match_stats UNION SELECT DISTINCT away_team FROM match_stats ORDER BY 1")
+            teams = connection.execute(query).fetchall()
+            return [team[0] for team in teams]
+    
+    def get_teams_by_league(self):
+        """Fetches all unique team names from the database, grouped by league."""
+        with self.engine.connect() as connection:
+            query = text("""
+            SELECT league, team FROM (
+                SELECT league, home_team as team FROM match_stats
+                UNION
+                SELECT league, away_team as team FROM match_stats
+            )
+            GROUP BY league, team
+            ORDER BY league, team
+            """)
+            result = connection.execute(query).fetchall()
+            
+            teams_by_league = {}
+            for league, team in result:
+                if league not in teams_by_league:
+                    teams_by_league[league] = []
+                teams_by_league[league].append(team)
+            
+            return teams_by_league
+
+    def get_team_data(self, team_name: str):
+        """
+        Retrieves all match data for a specific team.
+
+        Args:
+            team_name (str): The name of the team.
+
+        Returns:
+            pd.DataFrame: A DataFrame containing the team's match data.
+        """
+        with self.engine.connect() as connection:
+            query = text("""
+            SELECT * FROM match_stats WHERE home_team = :team_name OR away_team = :team_name
+            """)
+            df = pd.read_sql(query, connection, params={"team_name": team_name})
+            return df

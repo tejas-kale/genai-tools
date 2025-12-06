@@ -1,97 +1,101 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
-from .data_manager import get_data, get_available_teams, LEAGUES, SEASONS
-from .processing import calculate_rolling_averages
-import os
+from xg_grapher.data_manager import DataManager
+from xg_grapher.processing import calculate_rolling_averages
 
-st.set_page_config(layout="wide")
-
-
-def format_team_selection(teams_by_league):
-    """Format the team selection dropdown."""
+def get_team_selections(dm):
+    """Creates a formatted list for the team selection dropdown."""
+    # Pre-fetch data for all leagues and seasons to populate the dropdown
+    for league in dm.get_leagues():
+        for season in dm.get_seasons():
+            dm.fetch_and_store_data(league, season)
+    
+    teams_by_league = dm.get_teams_by_league()
+    
     options = []
-    for league, teams in teams_by_league.items():
-        options.append(f"--- {league} ---")
+    league_map = {v: k for k, v in dm.get_leagues().items()}
+    
+    for league_short, teams in sorted(teams_by_league.items()):
+        league_full = league_map.get(league_short, league_short).split('-')[1]
+        options.append(f"--- {league_full} ---")
         for team in teams:
             options.append(f"  {team}")
     return options
 
-
 def main():
     """Main function to run the Streamlit app."""
-    st.title("xG Rolling Averages")
+    st.set_page_config(layout="wide")
+    st.title("xG Trend Visualizer")
 
-    # Initial data load for the first league and season to get teams
-    with st.spinner("Loading initial data..."):
-        get_data(list(LEAGUES.keys())[0], SEASONS[0])
+    dm = DataManager(db_path="./tools/xg_grapher/xg_data.db")
+    
+    st.sidebar.header("Select Team")
 
-    teams_by_league = get_available_teams()
+    # Populate dropdown
+    with st.spinner("Fetching available teams..."):
+        team_options = get_team_selections(dm)
 
-    if not teams_by_league:
-        st.warning("No data available. Please run the data fetching process.")
-        return
+    selected_option = st.sidebar.selectbox(
+        "Choose a team",
+        team_options
+    )
 
-    formatted_teams = format_team_selection(teams_by_league)
-    selected_team_formatted = st.selectbox("Select a Team", formatted_teams)
+    if selected_option and not selected_option.startswith("---"):
+        team_name = selected_option.strip()
+        st.header(f"xG Trends for {team_name}")
 
-    if selected_team_formatted:
-        if selected_team_formatted.startswith("---"):
-            st.info("Please select a club.")
-            return
+        with st.spinner(f"Fetching and processing data for {team_name}..."):
+            team_data = dm.get_team_data(team_name)
+            if not team_data.empty:
+                rolling_data = calculate_rolling_averages(team_data, team_name)
 
-        selected_team = selected_team_formatted.strip()
-        st.header(f"10-Game Rolling xG Averages for {selected_team}")
+                # Melt data for Altair
+                plot_data = rolling_data.melt(
+                    id_vars=["season", "match_num", "date"],
+                    value_vars=["xg_for_roll", "xg_against_roll"],
+                    var_name="Metric",
+                    value_name="xG"
+                )
+                plot_data["Metric"] = plot_data["Metric"].map({
+                    "xg_for_roll": "Expected Goals For",
+                    "xg_against_roll": "Expected Goals Against"
+                })
 
-        league_id = None
-        for l_id, l_name in LEAGUES.items():
-            if l_name in teams_by_league and selected_team in teams_by_league[l_name]:
-                league_id = l_id
-                break
-
-        if league_id:
-            with st.spinner(f"Loading data for {selected_team}..."):
-                full_data = pd.DataFrame()
-                for season in SEASONS:
-                    data = get_data(league_id, season)
-                    if not data.empty:
-                        full_data = pd.concat([full_data, data])
-
-            if not full_data.empty:
-                rolling_df = calculate_rolling_averages(full_data, selected_team)
-
-                base_chart = (
-                    alt.Chart(rolling_df)
-                    .encode(x=alt.X("match_num:Q", title="Match Number"))
-                    .properties(width=200, height=300)
+                # Chart
+                color_scale = alt.Scale(
+                    domain=["Expected Goals For", "Expected Goals Against"],
+                    range=["#3498db", "#e74c3c"]
                 )
 
-                line_for = base_chart.mark_line(color="blue").encode(
-                    y=alt.Y("rolling_xg_for:Q", title="xG (10-game Rolling)")
+                line = alt.Chart(plot_data).mark_line().encode(
+                    x=alt.X("match_num:Q", title="Match Number"),
+                    y=alt.Y("xG:Q", title="Expected Goals (10-game Rolling Avg)"),
+                    color=alt.Color("Metric:N", scale=color_scale, title=None, legend=alt.Legend(orient="top")),
+                    tooltip=["date", "xG"]
                 )
-                points_for = base_chart.mark_point(color="blue").encode(
-                    y=alt.Y("rolling_xg_for:Q")
-                )
-
-                line_against = base_chart.mark_line(color="red").encode(
-                    y=alt.Y("rolling_xg_against:Q")
-                )
-                points_against = base_chart.mark_point(color="red").encode(
-                    y=alt.Y("rolling_xg_against:Q")
-                )
-
-                chart = (
-                    (line_for + points_for + line_against + points_against)
-                    .facet(column=alt.Column("season:N", title="Season"))
-                    .resolve_scale(x="independent")
+                
+                points = alt.Chart(plot_data).mark_point().encode(
+                    x=alt.X("match_num:Q", title="Match Number"),
+                    y=alt.Y("xG:Q", title="Expected Goals (10-game Rolling Avg)"),
+                    color=alt.Color("Metric:N", scale=color_scale),
+                     tooltip=["date", "xG"]
                 )
 
-                st.altair_chart(chart, use_container_width=True)
+                chart = (line + points).properties(
+                    height=400
+                ).facet(
+                    column=alt.Column("season:N", title=None, header=alt.Header(labelOrient="bottom"))
+                ).configure_view(
+                    stroke=None # Removes the border around each facet
+                )
+                
+                st.altair_chart(chart, use_container_width=True, theme="streamlit")
+
             else:
-                st.warning(f"No data available for {selected_team}")
-        else:
-            st.error("Could not determine the league for the selected team.")
-
+                st.warning(f"No data found for {team_name}.")
+    elif selected_option:
+        st.info("Please select a club from the dropdown to see the visualization.")
 
 if __name__ == "__main__":
     main()
