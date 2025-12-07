@@ -84,10 +84,7 @@ def main():
 
                     # Rename metric values for cleaner legend labels in the plot
                     plot_data["Metric"] = plot_data["Metric"].map(
-                        {
-                            "xg_for_roll": "Expected Goals For",
-                            "xg_against_roll": "Expected Goals Against",
-                        }
+                        {"xg_for_roll": "xG For", "xg_against_roll": "xG Against"}
                     )
 
                     # Generate the static plot using Seaborn via the helper module
@@ -95,6 +92,9 @@ def main():
 
                     # Display the matplotlib figure in Streamlit
                     st.pyplot(fig)
+
+                # Add a line break between each club for visual separation
+                st.markdown("---")
         else:
             # Fallback message if no data is returned
             st.warning("No data found for the selected league.")

@@ -38,19 +38,20 @@ def plot_xg_trends(plot_data: pd.DataFrame, team_name: str):
 
     # Economist colors (approximate)
     # Blue-ish for For, Red-ish for Against
-    palette = {"Expected Goals For": "#0072B2", "Expected Goals Against": "#D55E00"}
+    palette = {"xG For": "#0072B2", "xG Against": "#D55E00"}
 
     # Create the plot
     # Using FacetGrid to handle seasons as columns, similar to the Altair chart
     g = sns.FacetGrid(
         plot_data,
         col="season",
-        col_wrap=3,  # Wrap columns if too many, though seasons usually fit in one row or wrap nicely
-        sharex=False,  # Match numbers reset per season, so don't strictly share x-axis range if lengths differ
-        sharey=True,  # Share Y for comparison
+        col_wrap=3,
+        sharex=False,
+        sharey=True,
         height=4,
         aspect=1.5,
     )
+    g.set(ylim=(0, 38))  # Set consistent Y-axis limits across all facets
 
     # Map the line plot
     g.map_dataframe(
@@ -78,22 +79,29 @@ def plot_xg_trends(plot_data: pd.DataFrame, team_name: str):
 
     # Customize titles and labels
     g.set_titles("{col_name}", fontweight="bold", fontsize=14)
-    g.set_axis_labels(
-        "Match Number", "Expected Goals (10-game Rolling Avg)", fontsize=12
+    g.set_axis_labels("Match Number", "xG", fontsize=12)
+
+    # Adjust legend position to the bottom of the figure
+    g.add_legend(
+        title="",
+        fontsize=12,
+        loc="lower center",  # Position below the plots
+        bbox_to_anchor=(0.5, -0.08),  # Fine-tune vertical position relative to figure
+        ncol=2,  # Two columns for the legend items
+        frameon=False,  # No box around the legend
     )
 
-    # Adjust legend
-    g.add_legend(title="", fontsize=12, adjust_subtitles=True)
-
-    # Set overall title
+    # Set overall title, adjusted to make space for the legend at the bottom
     g.figure.suptitle(
-        f"{team_name}: Expected Goals Trends (10-Game Rolling Average)",
+        f"{team_name}: xG Trends (10-Game Rolling Average)",  # Update title text for consistency
         fontsize=16,
         fontweight="bold",
-        y=1.05,
+        y=1.02,  # Adjust y position to move it slightly higher
     )
 
-    # Tight layout to prevent clipping
-    plt.tight_layout()
+    # Tight layout to prevent clipping, adjusting for legend space
+    plt.tight_layout(
+        rect=[0, 0.08, 1, 0.95]
+    )  # Adjust rect to make space for bottom legend and top title
 
     return g.figure
