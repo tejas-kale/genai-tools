@@ -28,8 +28,8 @@ dependencies = [
     "lxml",
     "html5lib",
     "sqlalchemy",
-    "altair",
     "numpy",
+    "seaborn>=0.13.2",
 ]
 
 [project.optional-dependencies]
