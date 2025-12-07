@@ -51,7 +51,9 @@ def plot_xg_trends(plot_data: pd.DataFrame, team_name: str):
         height=4,
         aspect=1.5,
     )
-    g.set(ylim=(0, 38))  # Set consistent Y-axis limits across all facets
+    g.set(
+        ylim=(0, 38), xlim=(0, 38)
+    )  # Set consistent Y and X-axis limits across all facets
 
     # Map the line plot
     g.map_dataframe(
